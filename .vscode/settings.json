@@ -1,0 +1,23 @@
+{
+    // Formatting
+    "editor.formatOnSave": true,
+    "editor.formatOnSaveMode": "file",
+    "[json]": {
+        "editor.defaultFormatter": "vscode.json-language-features"
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    // Theme Colors
+    "workbench.colorCustomizations": {
+        "titleBar.activeBackground": "#9a6484",
+        "titleBar.inactiveBackground": "#5e4152"
+    },
+    // Terminal
+    "terminal.integrated.defaultProfile.osx": "zsh",
+    "terminal.integrated.defaultProfile.windows": "Git Bash",
+    "terminal.integrated.defaultProfile.linux": "sh",
+    "tailwindCSS.rootFontSize": 13,
+    // Mute 'Unknown at rule @tailwind' error
+    "scss.lint.unknownAtRules": "ignore"
+}

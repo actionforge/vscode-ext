@@ -1,0 +1,88 @@
+{
+	"name": "vscode-graph-editor",
+	"displayName": "Actionforge Graph Editor",
+	"description": "A visual editor for GitHub Actions workflows",
+	"version": "0.4.35",
+	"publisher": "actionforge",
+	"private": true,
+	"icon": "assets/icon.png",
+	"license": "Actionforge Community License v1",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/actionforge/vscode-graph-editor"
+	},
+	"engines": {
+		"vscode": "^1.74.0"
+	},
+	"categories": [
+		"Visualization"
+	],
+	"keywords": [
+		"workflows",
+		"actions",
+		"node graph",
+		"yaml",
+		"multi-root ready"
+	],
+	"preview": true,
+	"galleryBanner": {
+		"color": "#0e360d",
+		"theme": "dark"
+	},
+	"activationEvents": [],
+	"main": "./out/extension.js",
+	"contributes": {
+		"customEditors": [
+			{
+				"viewType": "actionforge.graph",
+				"displayName": "Actionforge Graph Editor",
+				"selector": [
+					{
+						"filenamePattern": "**/.github/workflows/graphs/*.yml"
+					}
+				]
+			}
+		],
+		"commands": [
+			{
+				"icon": "$(code)",
+				"command": "actionforge.switch-view",
+				"title": "Show workflow in text editor",
+				"category": "Actionforge"
+			},
+			{
+				"command": "actionforge.graph.new",
+				"title": "Create new action graph",
+				"category": "Actionforge"
+			}
+		],
+		"menus": {
+			"editor/title": [
+				{
+					"command": "actionforge.switch-view",
+					"group": "navigation",
+					"when": "resourcePath =~ /^.*\\.github[/\\\\]workflows[/\\\\]graphs[/\\\\].*\\.yml/"
+				}
+			]
+		}
+	},
+	"scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"lint": "eslint \"src/**/*.ts\"",
+		"watch": "tsc -w -p ./"
+	},
+	"devDependencies": {
+		"@types/js-yaml": "^4.0.9",
+		"@types/node": "^16.18.34",
+		"@types/vscode": "^1.73.0",
+		"@typescript-eslint/eslint-plugin": "^6.7.0",
+		"@typescript-eslint/parser": "^6.15.0",
+		"eslint": "^8.26.0",
+		"typescript": "^5.2.2"
+	},
+	"dependencies": {
+		"@octokit/rest": "^20.0.2",
+		"js-yaml": "^4.1.0"
+	}
+}

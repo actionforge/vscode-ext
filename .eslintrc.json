@@ -1,0 +1,41 @@
+{
+	"root": true,
+	"parser": "@typescript-eslint/parser",
+	"ignorePatterns": [
+		"projects/**/*"
+	],
+	"parserOptions": {
+		"project": [
+			"tsconfig.json"
+		]
+	},
+	"overrides": [
+		{
+			"files": [
+				"*.ts"
+			],
+			"extends": [
+				"eslint:recommended",
+				"plugin:@typescript-eslint/recommended"
+			],
+			"rules": {
+				"@typescript-eslint/no-unused-vars": [
+					"error",
+					{
+						"argsIgnorePattern": "^_",
+						"varsIgnorePattern": "^_",
+						"caughtErrorsIgnorePattern": "^_"
+					}
+				],
+				"@typescript-eslint/no-floating-promises": "error"
+			}
+		},
+		{
+			"files": [
+				"*.html"
+			],
+			"extends": [],
+			"rules": {}
+		}
+	]
+}
