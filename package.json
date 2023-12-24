@@ -1,15 +1,15 @@
 {
-	"name": "vscode-graph-editor",
+	"name": "vscode-ext",
 	"displayName": "Actionforge Graph Editor",
 	"description": "A visual editor for GitHub Actions workflows",
-	"version": "0.4.35",
+	"version": "0.4.36",
 	"publisher": "actionforge",
 	"private": true,
 	"icon": "assets/icon.png",
 	"license": "Actionforge Community License v1",
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/actionforge/vscode-graph-editor"
+		"url": "https://github.com/actionforge/vscode-ext"
 	},
 	"engines": {
 		"vscode": "^1.74.0"
@@ -21,8 +21,7 @@
 		"workflows",
 		"actions",
 		"node graph",
-		"yaml",
-		"multi-root ready"
+		"yaml"
 	],
 	"preview": true,
 	"galleryBanner": {
