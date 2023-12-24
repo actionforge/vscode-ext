@@ -1,54 +1,11 @@
 
+import { readFileSync } from 'fs';
 import path = require('path');
 
 import * as vscode from 'vscode';
 
-import { readFileSync } from 'fs';
-
-export interface GitUriParams {
-	path: string;
-	ref: string;
-	submoduleOf?: string;
-}
-
-export interface GitUriOptions {
-	replaceFileExtension?: boolean;
-	submoduleOf?: string;
-}
-
-export function isGitUri(uri: vscode.Uri): boolean {
+function isGitUri(uri: vscode.Uri): boolean {
 	return /^git$/.test(uri.scheme);
-}
-
-export function fromGitUri(uri: vscode.Uri): GitUriParams {
-	return JSON.parse(uri.query);
-}
-
-// As a mitigation for extensions like ESLint showing warnings and errors
-// for git URIs, let's change the file extension of these uris to .git,
-// when `replaceFileExtension` is true.
-export function toGitUri(uri: vscode.Uri, ref: string, options: GitUriOptions = {}): vscode.Uri {
-	const params: GitUriParams = {
-		path: uri.fsPath,
-		ref
-	};
-
-	if (options.submoduleOf) {
-		params.submoduleOf = options.submoduleOf;
-	}
-
-	let p = uri.path;
-
-	if (options.replaceFileExtension) {
-		p = `${p}.git`;
-	} else if (options.submoduleOf) {
-		p = `${p}.diff`;
-	}
-
-	return uri.with({
-		scheme: 'git',
-		path: p
-	});
 }
 
 export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvider {
@@ -76,13 +33,13 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 				return;
 			}
 
-			// TODO: (Seb) Browse the directory and search for the real '.github',
-			// the root of the project might be in a sub or parent directory.
+			// TODO: (Seb) Browse the directory and search for the real '.github',  
+			// the root of the project might be in a sub or parent directory.  
 			const uri = vscode.Uri.joinPath(workspaceFolders[0].uri, '.github', 'workflows', 'graphs', `new-${ActionGraphEditorProvider.newActionGraphFileId++}.yml`)
 				.with({ scheme: 'untitled' });
 
 			void vscode.commands.executeCommand('vscode.openWith', uri, ActionGraphEditorProvider.viewType, {
-				// For now 
+				// For now   
 				supportsMultipleEditorsPerDocument: false
 			});
 		});
@@ -102,7 +59,7 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 
 	private postMessageWithResponse<R = unknown>(panel: vscode.WebviewPanel, type: string, data: unknown): Promise<R> {
 		const requestId = this._requestId++;
-		// @ts-expect-error TODO: (Seb) Fix warning about mismatch of resolve
+		// @ts-expect-error TODO: (Seb) Fix warning about mismatch of resolve  
 		const p = new Promise<R>(resolve => this._callbacks.set(requestId, resolve));
 		void panel.webview.postMessage({ type, requestId, data });
 		return p;
@@ -214,9 +171,9 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 
 		let indexHtml = readFileSync(path.join(indexPath, 'index.html'), { encoding: 'utf8' });
 
-		indexHtml = indexHtml.replace('<base href="/">', `
-		<base href="${String(baseUri)}/">
-		<meta http-equiv="Content-Security-Policy" content="connect-src https://www.actionforge.dev;">
+		indexHtml = indexHtml.replace('<base href="/">', `  
+		<base href="${String(baseUri)}/">  
+		<meta http-equiv="Content-Security-Policy" content="connect-src https://www.actionforge.dev;">  
 		`);
 
 		return indexHtml;
@@ -225,8 +182,8 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 	private updateTextDocument(document: vscode.TextDocument, graphYaml: string): Thenable<boolean> {
 		const edit = new vscode.WorkspaceEdit();
 
-		// For now replace the entire content of the text object for simplicity.
-		// TODO: (Seb) Check for performance implications.
+		// For now replace the entire content of the text object for simplicity.  
+		// TODO: (Seb) Check for performance implications.  
 		edit.replace(
 			document.uri,
 			new vscode.Range(0, 0, document.lineCount, 0),
@@ -235,4 +192,4 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 
 		return vscode.workspace.applyEdit(edit);
 	}
-}
+}  
