@@ -2,7 +2,7 @@
 	"name": "vscode-ext",
 	"displayName": "Actionforge Graph Editor",
 	"description": "A visual editor for GitHub Actions workflows",
-	"version": "0.4.35",
+	"version": "0.4.36",
 	"publisher": "actionforge",
 	"private": true,
 	"icon": "assets/icon.png",
