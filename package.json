@@ -21,8 +21,7 @@
 		"workflows",
 		"actions",
 		"node graph",
-		"yaml",
-		"multi-root ready"
+		"yaml"
 	],
 	"preview": true,
 	"galleryBanner": {
