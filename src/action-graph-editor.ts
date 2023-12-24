@@ -122,48 +122,59 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 		};
 
 		if (isGitUri(document.uri)) {
-			// TODO: (Seb)
 			if (document.uri.query) {
 				panel.dispose();
-				void vscode.window.showErrorMessage('Diff view is not available yet.');
+				void vscode.window.showErrorMessage('Diff view is not implemented yet.');
 				return;
 			}
 		}
 
 		panel.webview.html = this.getHtmlForWebview(panel.webview);
 
-		const updateWebview = async () => {
-			return this.postMessage(panel, 'setFileData', {
-				data: document.getText(),
-				uri: document.uri.toString()
-			});
+		let saveWebviewStateCounter = 0;
+		let updateWebviewCounter = 0;
+
+		const saveWebviewState = async (counter: number) => {
+			const resp: string = await this.postMessageWithResponse<string>(panel, 'getFileData', {});
+			if (counter !== saveWebviewStateCounter) {
+				await this.updateTextDocument(document, resp);
+			}
 		};
 
-		const saveWebviewState = async () => {
-			// TODO: (Seb) Introduce a save id to ensure that
-			// previous saves are not overwritten by newer ones.
-			return this.postMessageWithResponse<string>(panel, 'getFileData', {})
-				.then((response: string) => {
-					return this.updateTextDocument(document, response);
+		const updateWebview = async (counter: number) => {
+			if (document.uri.scheme !== 'file') {
+				return;
+			}
+
+			if (updateWebviewCounter === counter) {
+				await this.postMessage(panel, 'setFileData', {
+					data: document.getText(),
+					uri: document.uri.toString()
 				});
-			// TODO: (Seb) Add check for errors here
+			}
 		};
 
-		const changeDocumentSubscription = vscode.workspace.onDidSaveTextDocument(e => {
-			if (e.uri.toString() === document.uri.toString()) {
-				void updateWebview();
+		const changeDocumentSubscription = vscode.workspace.onDidSaveTextDocument((e: vscode.TextDocument) => {
+			if (e.uri.toString() !== document.uri.toString()) {
+				return;
 			}
+
+			void updateWebview(++updateWebviewCounter);
 		});
 
-		const changeViewStatSubScription = panel.onDidChangeViewState(e => {
-			// Upon blur of the editor save the state of the webview
-			if (!e.webviewPanel.visible && document.uri.scheme === 'file') {
-				void saveWebviewState();
+		const changeViewStatSubScription = panel.onDidChangeViewState((e: vscode.WebviewPanelOnDidChangeViewStateEvent) => {
+			if (document.uri.scheme !== 'file') {
+				return;
 			}
+
+			if (e.webviewPanel.visible) {
+				void updateWebview(++updateWebviewCounter);
+			}
+
 		});
 
-		const saveDocumentSubscription = vscode.workspace.onWillSaveTextDocument(e => {
-			e.waitUntil(saveWebviewState());
+		const saveDocumentSubscription = vscode.workspace.onWillSaveTextDocument((e: vscode.TextDocumentWillSaveEvent) => {
+			e.waitUntil(saveWebviewState(saveWebviewStateCounter++));
 		});
 
 		const receiveMessageSubscription = panel.webview.onDidReceiveMessage(e => {
@@ -193,7 +204,7 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 			receiveMessageSubscription.dispose();
 		});
 
-		void updateWebview();
+		void updateWebview(++updateWebviewCounter);
 	}
 
 	private getHtmlForWebview(webview: vscode.Webview): string {
@@ -214,7 +225,7 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 	private updateTextDocument(document: vscode.TextDocument, graphYaml: string): Thenable<boolean> {
 		const edit = new vscode.WorkspaceEdit();
 
-		// Replace the entire content of the text object for simplicity.
+		// For now replace the entire content of the text object for simplicity.
 		// TODO: (Seb) Check for performance implications.
 		edit.replace(
 			document.uri,
