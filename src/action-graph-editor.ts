@@ -37,17 +37,17 @@ export function toGitUri(uri: vscode.Uri, ref: string, options: GitUriOptions = 
 		params.submoduleOf = options.submoduleOf;
 	}
 
-	let path = uri.path;
+	let p = uri.path;
 
 	if (options.replaceFileExtension) {
-		path = `${path}.git`;
+		p = `${p}.git`;
 	} else if (options.submoduleOf) {
-		path = `${path}.diff`;
+		p = `${p}.diff`;
 	}
 
 	return uri.with({
 		scheme: 'git',
-		path
+		path: p
 	});
 }
 
