@@ -80,14 +80,6 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 			enableScripts: true,
 		};
 
-		if (isGitUri(document.uri)) {
-			if (document.uri.query) {
-				panel.dispose();
-				void vscode.window.showErrorMessage('Diff view is not implemented yet.');
-				return;
-			}
-		}
-
 		panel.webview.html = this.getHtmlForWebview(panel.webview);
 
 		let updateWebviewCounter = 0;
