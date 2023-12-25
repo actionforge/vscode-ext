@@ -13,6 +13,7 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 	private static newActionGraphFileId = 1;
 
 	private static readonly viewType = 'actionforge.graph';
+	private state: vscode.Memento;
 
 	private _requestId = 1;
 	private readonly _callbacks = new Map<number, (response: unknown) => void>();
@@ -20,6 +21,7 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 	constructor(
 		private readonly context: vscode.ExtensionContext
 	) {
+		this.state = context.globalState
 	}
 
 	public static register(context: vscode.ExtensionContext): vscode.Disposable[] {
@@ -88,36 +90,49 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 
 		panel.webview.html = this.getHtmlForWebview(panel.webview);
 
-		let saveWebviewStateCounter = 0;
 		let updateWebviewCounter = 0;
+		let updateTextDocumentCounter = 0;
 
-		const saveWebviewState = async (counter: number) => {
-			const resp: string = await this.postMessageWithResponse<string>(panel, 'getFileData', {});
-			if (counter !== saveWebviewStateCounter) {
-				await this.updateTextDocument(document, resp);
+		const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
+			if (e.document.uri.toString() === document.uri.toString()) {
+				void updateWebview(++updateWebviewCounter);
 			}
-		};
+		});
+
+		const updateTextDocument = (document: vscode.TextDocument, graphYaml: string, counter: number): Thenable<boolean> => {
+			if (updateTextDocumentCounter > counter) {
+				return Promise.resolve(false);
+			}
+
+			const edit = new vscode.WorkspaceEdit();
+
+			// For now replace the entire content of the text object for simplicity.  
+			// TODO: (Seb) Check for performance implications.  
+			edit.replace(
+				document.uri,
+				new vscode.Range(0, 0, document.lineCount, 0),
+				graphYaml,
+			);
+
+			return vscode.workspace.applyEdit(edit);
+		}
 
 		const updateWebview = async (counter: number) => {
 			if (document.uri.scheme !== 'file') {
 				return;
 			}
 
-			if (updateWebviewCounter === counter) {
-				await this.postMessage(panel, 'setFileData', {
-					data: document.getText(),
-					uri: document.uri.toString()
-				});
-			}
-		};
-
-		const changeDocumentSubscription = vscode.workspace.onDidSaveTextDocument((e: vscode.TextDocument) => {
-			if (e.uri.toString() !== document.uri.toString()) {
+			if (updateWebviewCounter > counter) {
 				return;
 			}
 
-			void updateWebview(++updateWebviewCounter);
-		});
+			const graph = document.getText().replace(/\r\n/g, '\n');
+			await this.postMessage(panel, 'setFileData', {
+				data: graph,
+				uri: document.uri.toString(),
+				transform: await this.state.get(`transform_${document.uri.fsPath}`) || null
+			});
+		};
 
 		const changeViewStatSubScription = panel.onDidChangeViewState((e: vscode.WebviewPanelOnDidChangeViewStateEvent) => {
 			if (document.uri.scheme !== 'file') {
@@ -130,35 +145,24 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 
 		});
 
-		const saveDocumentSubscription = vscode.workspace.onWillSaveTextDocument((e: vscode.TextDocumentWillSaveEvent) => {
-			e.waitUntil(saveWebviewState(saveWebviewStateCounter++));
-		});
-
 		const receiveMessageSubscription = panel.webview.onDidReceiveMessage(e => {
-			const { type, requestId, data } = e;
+			const { type, data } = e;
 			switch (type) {
-				case 'callbackResponse':
-					{
-						const callback = this._callbacks.get(requestId);
-						if (callback) {
-							this._callbacks.delete(requestId);
-							callback?.(data);
-						} else {
-							console.warn(`Got response for unknown request id ${requestId}`);
-						}
-						return;
-					}
+				case 'saveTransform': {
+					void this.state.update(`transform_${document.uri.fsPath}`, data);
+					break;
+				}
 				case 'saveGraph': {
-					void this.updateTextDocument(document, data);
+					void updateTextDocument(document, data, ++updateTextDocumentCounter);
+					break;
 				}
 			}
 		});
 
 		panel.onDidDispose(() => {
-			changeDocumentSubscription.dispose();
-			saveDocumentSubscription.dispose();
 			changeViewStatSubScription.dispose();
 			receiveMessageSubscription.dispose();
+			changeDocumentSubscription.dispose();
 		});
 
 		void updateWebview(++updateWebviewCounter);
@@ -177,19 +181,5 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 		`);
 
 		return indexHtml;
-	}
-
-	private updateTextDocument(document: vscode.TextDocument, graphYaml: string): Thenable<boolean> {
-		const edit = new vscode.WorkspaceEdit();
-
-		// For now replace the entire content of the text object for simplicity.  
-		// TODO: (Seb) Check for performance implications.  
-		edit.replace(
-			document.uri,
-			new vscode.Range(0, 0, document.lineCount, 0),
-			graphYaml,
-		);
-
-		return vscode.workspace.applyEdit(edit);
 	}
 }  
