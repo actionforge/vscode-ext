@@ -4,11 +4,7 @@ import path = require('path');
 
 import * as vscode from 'vscode';
 
-function isGitUri(uri: vscode.Uri): boolean {
-	return /^git$/.test(uri.scheme);
-}
-
-export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvider {
+export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 
 	private static newActionGraphFileId = 1;
 
@@ -37,10 +33,10 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 
 			// TODO: (Seb) Browse the directory and search for the real '.github',  
 			// the root of the project might be in a sub or parent directory.  
-			const uri = vscode.Uri.joinPath(workspaceFolders[0].uri, '.github', 'workflows', 'graphs', `new-${ActionGraphEditorProvider.newActionGraphFileId++}.yml`)
+			const uri = vscode.Uri.joinPath(workspaceFolders[0].uri, '.github', 'workflows', 'graphs', `new-${AgEditorProvider.newActionGraphFileId++}.yml`)
 				.with({ scheme: 'untitled' });
 
-			void vscode.commands.executeCommand('vscode.openWith', uri, ActionGraphEditorProvider.viewType, {
+			void vscode.commands.executeCommand('vscode.openWith', uri, AgEditorProvider.viewType, {
 				// For now   
 				supportsMultipleEditorsPerDocument: false
 			});
@@ -53,7 +49,7 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 		});
 		subs.push(sub);
 
-		sub = vscode.window.registerCustomEditorProvider(ActionGraphEditorProvider.viewType, new ActionGraphEditorProvider(context));
+		sub = vscode.window.registerCustomEditorProvider(AgEditorProvider.viewType, new AgEditorProvider(context));
 		subs.push(sub);
 
 		return subs;
@@ -110,10 +106,6 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 		}
 
 		const updateWebview = async (counter: number) => {
-			if (document.uri.scheme !== 'file') {
-				return;
-			}
-
 			if (updateWebviewCounter > counter) {
 				return;
 			}
@@ -127,10 +119,6 @@ export class ActionGraphEditorProvider implements vscode.CustomTextEditorProvide
 		};
 
 		const changeViewStatSubScription = panel.onDidChangeViewState((e: vscode.WebviewPanelOnDidChangeViewStateEvent) => {
-			if (document.uri.scheme !== 'file') {
-				return;
-			}
-
 			if (e.webviewPanel.visible) {
 				void updateWebview(++updateWebviewCounter);
 			}
