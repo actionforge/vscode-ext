@@ -11,7 +11,6 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 	private static readonly viewType = 'actionforge.graph';
 	private state: vscode.Memento;
 
-	private _requestId = 1;
 	private readonly _callbacks = new Map<number, (response: unknown) => void>();
 
 	constructor(
@@ -24,22 +23,75 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 		const subs: vscode.Disposable[] = [];
 		let sub: vscode.Disposable;
 
-		sub = vscode.commands.registerCommand('actionforge.graph.github.new', () => {
+		sub = vscode.commands.registerCommand('actionforge.graph.github.new', async () => {
 			const workspaceFolders = vscode.workspace.workspaceFolders;
 			if (!workspaceFolders) {
 				void vscode.window.showErrorMessage("Creating a new action graph requires opening a workspace.");
 				return;
 			}
+			let newName = `new-${AgEditorProvider.newActionGraphFileId++}.yml`;
+
+			newName = await vscode.window.showInputBox({
+				title: "Choose a name for your action graph file",
+				placeHolder: "Enter the name of the action graph file to create.",
+				value: newName,
+				valueSelection: [0, newName.length - 4],
+				validateInput: text => {
+					if (!text) {
+						return 'A file name is required.';
+					} else if (text.indexOf('/') !== -1 || text.indexOf('\\') !== -1) {
+						return 'The file name cannot contain "/" characters.';
+					} else if (!text.endsWith('.yml')) {
+						return 'The file name must end with ".yml".';
+					}
+					return null;
+				}
+			}) ?? '';
+
+			if (!newName) {
+				return;
+			}
 
 			// TODO: (Seb) Browse the directory and search for the real '.github',  
 			// the root of the project might be in a sub or parent directory.  
-			const uri = vscode.Uri.joinPath(workspaceFolders[0].uri, '.github', 'workflows', 'graphs', `new-${AgEditorProvider.newActionGraphFileId++}.yml`)
-				.with({ scheme: 'untitled' });
+			const ruri = vscode.Uri.joinPath(workspaceFolders[0].uri, '.github', 'workflows');
+			const guri = vscode.Uri.joinPath(ruri, 'graphs', newName);
+			const wuri = vscode.Uri.joinPath(ruri, newName);
 
-			void vscode.commands.executeCommand('vscode.openWith', uri, AgEditorProvider.viewType, {
+			const wcontent = `on: [push]
+
+jobs:
+    build-and-publish:
+      runs-on: ubuntu-latest
+      name: My workflow
+      steps:
+        - name: Execute Action Graph
+          uses: actionforge/action@v0.4.35
+          with:
+            graph_file: ${newName}`;
+
+			const edit = new vscode.WorkspaceEdit();
+			// create action graph file
+			edit.createFile(guri, {
+				ignoreIfExists: false,
+				overwrite: false,
+			});
+			// create gh actions workflow file
+			edit.createFile(wuri, {
+				ignoreIfExists: false,
+				overwrite: false,
+				contents: Buffer.from(wcontent, 'utf8'),
+			});
+			await vscode.workspace.applyEdit(edit);
+
+			await vscode.commands.executeCommand('vscode.open', wuri);
+
+			await vscode.commands.executeCommand('vscode.openWith', guri, AgEditorProvider.viewType, {
 				// For now   
 				supportsMultipleEditorsPerDocument: false
 			});
+
+			await vscode.window.showInformationMessage(`Created new action graph and associated GH Actions workflow file.`);
 		});
 
 		subs.push(sub);
