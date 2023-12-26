@@ -1,7 +1,7 @@
 
 import { readFileSync } from 'fs';
-import path = require('path');
 
+import * as path from 'path';
 import * as vscode from 'vscode';
 
 export class AgEditorProvider implements vscode.CustomTextEditorProvider {
@@ -53,14 +53,6 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 		subs.push(sub);
 
 		return subs;
-	}
-
-	private postMessageWithResponse<R = unknown>(panel: vscode.WebviewPanel, type: string, data: unknown): Promise<R> {
-		const requestId = this._requestId++;
-		// @ts-expect-error TODO: (Seb) Fix warning about mismatch of resolve  
-		const p = new Promise<R>(resolve => this._callbacks.set(requestId, resolve));
-		void panel.webview.postMessage({ type, requestId, data });
-		return p;
 	}
 
 	private postMessage(panel: vscode.WebviewPanel, type: string, data: unknown, requestId?: number): Thenable<boolean> {
