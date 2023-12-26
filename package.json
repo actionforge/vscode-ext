@@ -50,8 +50,8 @@
 				"category": "Actionforge"
 			},
 			{
-				"command": "actionforge.graph.new",
-				"title": "Create new action graph",
+				"command": "actionforge.graph.github.new",
+				"title": "Create new action graph for GitHub Actions workflows",
 				"category": "Actionforge"
 			}
 		],

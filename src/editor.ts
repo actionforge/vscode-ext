@@ -24,7 +24,7 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 		const subs: vscode.Disposable[] = [];
 		let sub: vscode.Disposable;
 
-		sub = vscode.commands.registerCommand('actionforge.graph.new', () => {
+		sub = vscode.commands.registerCommand('actionforge.graph.github.new', () => {
 			const workspaceFolders = vscode.workspace.workspaceFolders;
 			if (!workspaceFolders) {
 				void vscode.window.showErrorMessage("Creating a new action graph requires opening a workspace.");
