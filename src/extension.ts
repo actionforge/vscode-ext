@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
-import { ActionGraphEditorProvider } from './action-graph-editor';
+import { AgEditorProvider } from './editor';
 
 export async function activate(context: vscode.ExtensionContext) {
-	context.subscriptions.push(...ActionGraphEditorProvider.register(context));
+	context.subscriptions.push(...AgEditorProvider.register(context));
 }
