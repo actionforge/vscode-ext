@@ -31,6 +31,12 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 			}
 			let newName = `new-${AgEditorProvider.newActionGraphFileId++}.yml`;
 
+			// TODO: (Seb) Browse the directory and search for the real '.github',  
+			// the root of the project might be in a sub or parent directory.  
+			const ruri = vscode.Uri.joinPath(workspaceFolders[0].uri, '.github', 'workflows');
+
+			let githubFiles = await vscode.workspace.findFiles('.github/workflows/**.*yml', null, 100);
+
 			newName = await vscode.window.showInputBox({
 				title: "Choose a name for your action graph file",
 				placeHolder: "Enter the name of the action graph file to create.",
@@ -44,6 +50,10 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 					} else if (!text.endsWith('.yml')) {
 						return 'The file name must end with ".yml".';
 					}
+
+					if (githubFiles.find((v: vscode.Uri) => v.path.endsWith(`/${text}`))) {
+						return 'A file with this name already exists.';
+					}
 					return null;
 				}
 			}) ?? '';
@@ -52,9 +62,14 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 				return;
 			}
 
-			// TODO: (Seb) Browse the directory and search for the real '.github',  
-			// the root of the project might be in a sub or parent directory.  
-			const ruri = vscode.Uri.joinPath(workspaceFolders[0].uri, '.github', 'workflows');
+			// After the input was validated, we need to check again if the file exists.
+			githubFiles = await vscode.workspace.findFiles('.github/workflows/**.*yml', null, 100);
+			if (githubFiles.find((v: vscode.Uri) => v.path.endsWith(`/${newName}`))) {
+				void vscode.window.showErrorMessage(`A file with the name '${newName}' already exists.`);
+				return;
+			}
+
+
 			const guri = vscode.Uri.joinPath(ruri, 'graphs', newName);
 			const wuri = vscode.Uri.joinPath(ruri, newName);
 
