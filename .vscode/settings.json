@@ -17,7 +17,8 @@
     "terminal.integrated.defaultProfile.osx": "zsh",
     "terminal.integrated.defaultProfile.windows": "Git Bash",
     "terminal.integrated.defaultProfile.linux": "sh",
-    "tailwindCSS.rootFontSize": 13,
+    // Typescript
+    "typescript.tsdk": "node_modules/typescript/lib",
     // Mute 'Unknown at rule @tailwind' error
     "scss.lint.unknownAtRules": "ignore"
 }
