@@ -11,8 +11,6 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 	private static readonly viewType = 'actionforge.graph';
 	private state: vscode.Memento;
 
-	private readonly _callbacks = new Map<number, (response: unknown) => void>();
-
 	constructor(
 		private readonly context: vscode.ExtensionContext
 	) {
@@ -108,28 +106,26 @@ jobs:
 				supportsMultipleEditorsPerDocument: false
 			});
 
-			await vscode.window.showInformationMessage(`Created new action graph and associated GH Actions workflow file.`);
+			await vscode.window.showInformationMessage(`Created new action graph and associated GitHub Actions workflow file.`);
 		});
 
 		subs.push(sub);
 
-		sub = vscode.commands.registerCommand('actionforge.text-view', async () => {
-			const editor = vscode.window.activeTextEditor
-			if (!editor) {
-				void vscode.window.showErrorMessage("No editor is active.");
+		sub = vscode.commands.registerCommand('actionforge.text-view', async (uri?: vscode.Uri) => {
+			if (!uri) {
+				void vscode.window.showErrorMessage("Command must be executed from the editor toolbar.");
 				return;
-			}
-
-			const doc = editor.document
-			if (doc.uri.scheme !== 'file') {
+			} else if (uri.scheme !== 'file') {
 				void vscode.window.showErrorMessage("Only local files are supported.");
 				return;
-			} else if (doc.uri.path.indexOf('.github/workflows/graphs') === -1 || !/\.ya?ml$/.test(doc.uri.path)) {
+			} else if (uri.path.indexOf('.github/workflows/graphs') === -1 || !/\.ya?ml$/.test(uri.path)) {
 				void vscode.window.showErrorMessage("File not in .github/workflows/graphs directory.");
 				return;
 			}
 
-			await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside, true);
+			await vscode.window.showTextDocument(uri, {
+				viewColumn: vscode.ViewColumn.Beside
+			});
 		});
 		subs.push(sub);
 

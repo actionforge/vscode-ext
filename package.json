@@ -37,7 +37,7 @@
 				"displayName": "Actionforge Graph Editor",
 				"selector": [
 					{
-						"filenamePattern": "**/.github/workflows/graphs/*.yml"
+						"filenamePattern": "**/.github/workflows/graphs/*.{yml,yaml}"
 					}
 				]
 			}
@@ -62,9 +62,9 @@
 		"menus": {
 			"editor/title": [
 				{
-					"command": "actionforge.graph",
+					"command": "actionforge.text-view",
 					"group": "navigation",
-					"when": "resourcePath =~ /^.*\\.github[/\\\\]workflows[/\\\\]graphs[/\\\\].*\\.yml/"
+					"when": "resourcePath =~ /^.*\\.github[/\\\\]workflows[/\\\\]graphs[/\\\\].*\\.ya?ml/"
 				}
 			]
 		}
