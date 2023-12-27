@@ -37,15 +37,19 @@
 				"displayName": "Actionforge Graph Editor",
 				"selector": [
 					{
-						"filenamePattern": "**/.github/workflows/graphs/*.yml"
+						"filenamePattern": "**/.github/workflows/graphs/*.{yml,yaml}"
 					}
 				]
 			}
 		],
 		"commands": [
 			{
+				"command": "actionforge.graph",
+				"title": "Action Graph"
+			},
+			{
 				"icon": "$(code)",
-				"command": "actionforge.switch-view",
+				"command": "actionforge.text-view",
 				"title": "Show workflow in text editor",
 				"category": "Actionforge"
 			},
@@ -58,9 +62,9 @@
 		"menus": {
 			"editor/title": [
 				{
-					"command": "actionforge.switch-view",
+					"command": "actionforge.text-view",
 					"group": "navigation",
-					"when": "resourcePath =~ /^.*\\.github[/\\\\]workflows[/\\\\]graphs[/\\\\].*\\.yml/"
+					"when": "resourcePath =~ /^.*\\.github[/\\\\]workflows[/\\\\]graphs[/\\\\].*\\.ya?ml/"
 				}
 			]
 		}
