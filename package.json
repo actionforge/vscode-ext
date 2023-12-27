@@ -44,8 +44,12 @@
 		],
 		"commands": [
 			{
+				"command": "actionforge.graph",
+				"title": "Action Graph"
+			},
+			{
 				"icon": "$(code)",
-				"command": "actionforge.switch-view",
+				"command": "actionforge.text-view",
 				"title": "Show workflow in text editor",
 				"category": "Actionforge"
 			},
@@ -58,7 +62,7 @@
 		"menus": {
 			"editor/title": [
 				{
-					"command": "actionforge.switch-view",
+					"command": "actionforge.graph",
 					"group": "navigation",
 					"when": "resourcePath =~ /^.*\\.github[/\\\\]workflows[/\\\\]graphs[/\\\\].*\\.yml/"
 				}

@@ -29,26 +29,27 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 				void vscode.window.showErrorMessage("Creating a new action graph requires opening a workspace.");
 				return;
 			}
-			let newName = `new-${AgEditorProvider.newActionGraphFileId++}.yml`;
+
+			let newName = `new-${AgEditorProvider.newActionGraphFileId}.yml`;
 
 			// TODO: (Seb) Browse the directory and search for the real '.github',  
 			// the root of the project might be in a sub or parent directory.  
 			const ruri = vscode.Uri.joinPath(workspaceFolders[0].uri, '.github', 'workflows');
 
-			let githubFiles = await vscode.workspace.findFiles('.github/workflows/**.*yml', null, 100);
+			let githubFiles = await vscode.workspace.findFiles('.github/workflows/**.*ya?ml', null, 100);
 
 			newName = await vscode.window.showInputBox({
 				title: "Choose a name for your action graph file",
 				placeHolder: "Enter the name of the action graph file to create.",
 				value: newName,
-				valueSelection: [0, newName.length - 4],
+				valueSelection: [3, newName.length - 4],
 				validateInput: text => {
 					if (!text) {
 						return 'A file name is required.';
 					} else if (text.indexOf('/') !== -1 || text.indexOf('\\') !== -1) {
 						return 'The file name cannot contain "/" characters.';
-					} else if (!text.endsWith('.yml')) {
-						return 'The file name must end with ".yml".';
+					} else if (!/\.ya?ml$/.test(text)) {
+						return 'The file name must end with ".yml" or ".yaml".';
 					}
 
 					if (githubFiles.find((v: vscode.Uri) => v.path.endsWith(`/${text}`))) {
@@ -63,15 +64,16 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 			}
 
 			// After the input was validated, we need to check again if the file exists.
-			githubFiles = await vscode.workspace.findFiles('.github/workflows/**.*yml', null, 100);
+			githubFiles = await vscode.workspace.findFiles('.github/workflows/**.*ya?ml', null, 100);
 			if (githubFiles.find((v: vscode.Uri) => v.path.endsWith(`/${newName}`))) {
 				void vscode.window.showErrorMessage(`A file with the name '${newName}' already exists.`);
 				return;
 			}
 
-
 			const guri = vscode.Uri.joinPath(ruri, 'graphs', newName);
 			const wuri = vscode.Uri.joinPath(ruri, newName);
+
+			AgEditorProvider.newActionGraphFileId++;
 
 			const wcontent = `on: [push]
 
@@ -111,7 +113,22 @@ jobs:
 
 		subs.push(sub);
 
-		sub = vscode.commands.registerCommand('actionforge.switch-view', async (doc: vscode.TextDocument) => {
+		sub = vscode.commands.registerCommand('actionforge.text-view', async () => {
+			const editor = vscode.window.activeTextEditor
+			if (!editor) {
+				void vscode.window.showErrorMessage("No editor is active.");
+				return;
+			}
+
+			const doc = editor.document
+			if (doc.uri.scheme !== 'file') {
+				void vscode.window.showErrorMessage("Only local files are supported.");
+				return;
+			} else if (doc.uri.path.indexOf('.github/workflows/graphs') === -1 || !/\.ya?ml$/.test(doc.uri.path)) {
+				void vscode.window.showErrorMessage("File not in .github/workflows/graphs directory.");
+				return;
+			}
+
 			await vscode.window.showTextDocument(doc, vscode.ViewColumn.Beside, true);
 		});
 		subs.push(sub);
