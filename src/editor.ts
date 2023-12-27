@@ -40,7 +40,7 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 				title: "Choose a name for your action graph file",
 				placeHolder: "Enter the name of the action graph file to create.",
 				value: newName,
-				valueSelection: [3, newName.length - 4],
+				valueSelection: [0, newName.length - 4],
 				validateInput: text => {
 					if (!text) {
 						return 'A file name is required.';
