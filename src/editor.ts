@@ -4,17 +4,173 @@ import { readFileSync } from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
 
+import debounce from 'lodash.debounce';
+import AsyncLock from 'async-lock';
+
+
 export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 
 	private static newActionGraphFileId = 1;
 
 	private static readonly viewType = 'actionforge.graph';
+	private tmpStorage = new TenporaryStorage();
 	private state: vscode.Memento;
+
+	private readonly webviews = new WebviewCollection();
 
 	constructor(
 		private readonly context: vscode.ExtensionContext
 	) {
-		this.state = context.globalState
+		this.state = context.workspaceState;
+	}
+
+	public async resolveCustomTextEditor(
+		document: vscode.TextDocument,
+		panel: vscode.WebviewPanel,
+		_token: vscode.CancellationToken
+	): Promise<void> {
+
+		const useTextview = this.state.get('useTextview') ?? false;
+
+		if (useTextview) {
+			setTimeout(() => {
+				panel.dispose();
+				void closeDocumentsWithUri(document.uri)
+					.then(() => {
+						return vscode.window.showTextDocument(document.uri);
+					})
+			}, 0);
+			return;
+		}
+
+		// Support only a single view per document for now.
+		// To add multi-view support, fix the possibilities
+		// of all race conditions that can occur when multiple
+		// views are edited.
+		// For example, it takes a while to construct the graph
+		// for an action graph, and due to the asynchronous nature
+		// different document versions can overwrite each other,
+		// possibily resulting in different states in different views.
+		const wv = this.webviews.get(document.uri);
+		for (const w of wv) {
+			w.reveal();
+
+			// Use a timeout to avoid a flash that the webview is not available anymore.
+			setTimeout(() => {
+				panel.dispose();
+			}, 0);
+			return;
+		}
+
+		this.webviews.add(document.uri, panel);
+
+		const applyEditLock = new AsyncLock();
+		const internalUpdates = new Set<number>([document.version]);
+
+		panel.webview.options = {
+			enableScripts: true,
+		};
+		panel.webview.html = this.getHtmlForWebview(panel.webview);
+
+		const getText = (): string => {
+			// Normalize line endings to ensure the graph editor
+			// gets a canonical version of the graph. It makes
+			// change detections easier.
+			return document.getText().replace(/\r\n/g, '\n');
+		}
+
+		const applyEdit = async (document: vscode.TextDocument, graph: string): Promise<void> => {
+			const edit = new vscode.WorkspaceEdit();
+
+			// For now replace the entire content of the text object for simplicity.  
+			// TODO: (Seb) Check for performance implications.  
+			edit.replace(
+				document.uri,
+				new vscode.Range(0, 0, document.lineCount, 0),
+				graph,
+			);
+
+			await applyEditLock.acquire("applyEdit", async () => {
+				// console.log(`[${panel.viewColumn}]Applying edit with version ${document.version} and uri ${document.uri.toString()}`);
+				await vscode.workspace.applyEdit(edit);
+			});
+		};
+
+		const debounceApplyEdit = debounce(applyEdit.bind(null, document), 0);
+
+		const updateWebview = (oldDocumentVersion: number, graph: string) => {
+			if (document.version > oldDocumentVersion) {
+				return;
+			}
+
+			void this.postMessage(panel, 'setFileData', {
+				data: graph,
+				uri: document.uri.toString(),
+				transform: this.tmpStorage.get(`transform_${document.uri.fsPath}`) || null
+			});
+		};
+
+		const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
+			// console.log(`[${panel.viewColumn}]Text document change detected with version ${e.document.version} and uri ${e.document.uri.toString()}`);
+			if (e.document.uri.toString() === document.uri.toString() && e.document.isDirty) {
+				if (internalUpdates.has(e.document.version)) {
+					// console.log(`[${panel.viewColumn}]Internal update detected with version ${e.document.version} and uri ${JSON.stringify(e)}`)
+					internalUpdates.delete(e.document.version);
+				} else {
+					console.log(e.document.version, document.version);
+					updateWebview(document.version, getText());
+				}
+			}
+		});
+
+		const changeViewStatSubScription = panel.onDidChangeViewState((e: vscode.WebviewPanelOnDidChangeViewStateEvent) => {
+			if (e.webviewPanel.visible) {
+				updateWebview(document.version, getText());
+			}
+		});
+
+		const receiveMessageSubscription = panel.webview.onDidReceiveMessage(e => {
+			const { type, data } = e;
+			switch (type) {
+				case 'saveTransform': {
+					this.tmpStorage.set(`transform_${document.uri.fsPath}`, data);
+					break;
+				}
+				case 'saveGraph': {
+					// console.log(`[${panel.viewColumn}]Saving graph with version ${document.version}`);
+					internalUpdates.add(document.version + 1 /* plus one as its the future version */);
+					void debounceApplyEdit(data);
+					break;
+				}
+			}
+		});
+
+		panel.onDidDispose(() => {
+			changeViewStatSubScription.dispose();
+			receiveMessageSubscription.dispose();
+			changeDocumentSubscription.dispose();
+		});
+
+		updateWebview(document.version, getText());
+	}
+
+	private postMessage(panel: vscode.WebviewPanel, type: string, data: unknown, requestId?: number): Thenable<boolean> {
+		return panel.webview.postMessage({ type, data, requestId });
+	}
+
+	private getHtmlForWebview(webview: vscode.Webview): string {
+		const indexPath = path.join(this.context.extensionPath, 'media', 'graph-editor');
+
+		const baseUri = webview.asWebviewUri(vscode.Uri.file(indexPath));
+
+		let indexHtml = readFileSync(path.join(indexPath, 'index.html'), { encoding: 'utf8' });
+
+		indexHtml = indexHtml.replace('<base href="/">', `  
+		<base href="${String(baseUri)}/">  
+		<meta http-equiv="Content-Security-Policy" content="connect-src https://www.actionforge.dev;">  
+		`);
+
+		return indexHtml;
 	}
 
 	public static register(context: vscode.ExtensionContext): vscode.Disposable[] {
@@ -99,12 +255,11 @@ jobs:
 			});
 			await vscode.workspace.applyEdit(edit);
 
+			// Open the workflow file in the text editor.
 			await vscode.commands.executeCommand('vscode.open', wuri);
 
-			await vscode.commands.executeCommand('vscode.openWith', guri, AgEditorProvider.viewType, {
-				// For now   
-				supportsMultipleEditorsPerDocument: false
-			});
+			// Open the action graph file in the graph editor.
+			await vscode.commands.executeCommand('vscode.openWith', guri, AgEditorProvider.viewType);
 
 			await vscode.window.showInformationMessage(`Created new action graph and associated GitHub Actions workflow file.`);
 		});
@@ -123,115 +278,100 @@ jobs:
 				return;
 			}
 
-			await vscode.window.showTextDocument(uri, {
-				viewColumn: vscode.ViewColumn.Beside
-			});
+			// If hte command was executed from the text editor, open the file in the graph editor.
+			// Otherwise open the file in a new text editor.
+			const activeEditor = vscode.window.activeTextEditor;
+
+			void context.workspaceState.update('useTextview', !(await context.workspaceState.get('useTextview') ?? false))
+				.then(() => {
+					return vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+				})
+				.then(() => {
+					if (activeEditor) {
+						return vscode.commands.executeCommand('vscode.openWith', uri, AgEditorProvider.viewType);
+					} else {
+						return vscode.window.showTextDocument(uri);
+					}
+				})
 		});
 		subs.push(sub);
 
-		sub = vscode.window.registerCustomEditorProvider(AgEditorProvider.viewType, new AgEditorProvider(context));
+		sub = vscode.window.registerCustomEditorProvider(AgEditorProvider.viewType, new AgEditorProvider(context), {
+			webviewOptions: {
+				retainContextWhenHidden: true,
+			},
+			supportsMultipleEditorsPerDocument: false,
+		});
 		subs.push(sub);
 
 		return subs;
 	}
-
-	private postMessage(panel: vscode.WebviewPanel, type: string, data: unknown, requestId?: number): Thenable<boolean> {
-		return panel.webview.postMessage({ type, data, requestId });
-	}
-
-	public async resolveCustomTextEditor(
-		document: vscode.TextDocument,
-		panel: vscode.WebviewPanel,
-		_token: vscode.CancellationToken
-	): Promise<void> {
-		panel.webview.options = {
-			enableScripts: true,
-		};
-
-		panel.webview.html = this.getHtmlForWebview(panel.webview);
-
-		let updateWebviewCounter = 0;
-		let updateTextDocumentCounter = 0;
-
-		const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
-			if (e.document.uri.toString() === document.uri.toString()) {
-				void updateWebview(++updateWebviewCounter);
-			}
-		});
-
-		const updateTextDocument = (document: vscode.TextDocument, graphYaml: string, counter: number): Thenable<boolean> => {
-			if (updateTextDocumentCounter > counter) {
-				return Promise.resolve(false);
-			}
-
-			const edit = new vscode.WorkspaceEdit();
-
-			// For now replace the entire content of the text object for simplicity.  
-			// TODO: (Seb) Check for performance implications.  
-			edit.replace(
-				document.uri,
-				new vscode.Range(0, 0, document.lineCount, 0),
-				graphYaml,
-			);
-
-			return vscode.workspace.applyEdit(edit);
-		}
-
-		const updateWebview = async (counter: number) => {
-			if (updateWebviewCounter > counter) {
+}
+/**
+ * Close all editors that show a given uri.
+*/
+function closeDocumentsWithUri(targetUri: vscode.Uri): Thenable<void> {
+	let promise: Thenable<void> = Promise.resolve();
+	vscode.window.visibleTextEditors.forEach(editor => {
+		if (editor.document.uri.toString() === targetUri.toString()) {
+			promise = vscode.window.showTextDocument(editor.document).then(() => {
+				return vscode.commands.executeCommand('workbench.action.closeActiveEditor');
+			}).then(() => {
 				return;
-			}
-
-			const graph = document.getText().replace(/\r\n/g, '\n');
-			await this.postMessage(panel, 'setFileData', {
-				data: graph,
-				uri: document.uri.toString(),
-				transform: await this.state.get(`transform_${document.uri.fsPath}`) || null
 			});
-		};
+		}
+	});
+	return Promise.resolve(promise);
+}
 
-		const changeViewStatSubScription = panel.onDidChangeViewState((e: vscode.WebviewPanelOnDidChangeViewStateEvent) => {
-			if (e.webviewPanel.visible) {
-				void updateWebview(++updateWebviewCounter);
-			}
 
-		});
+/**
+* Similar to vscode.Memento but sync setter and getter,
+* and only for the lifetime of the extension.
+*/
+class TenporaryStorage {
+	private readonly _storage = new Map<string, unknown>();
 
-		const receiveMessageSubscription = panel.webview.onDidReceiveMessage(e => {
-			const { type, data } = e;
-			switch (type) {
-				case 'saveTransform': {
-					void this.state.update(`transform_${document.uri.fsPath}`, data);
-					break;
-				}
-				case 'saveGraph': {
-					void updateTextDocument(document, data, ++updateTextDocumentCounter);
-					break;
-				}
-			}
-		});
-
-		panel.onDidDispose(() => {
-			changeViewStatSubScription.dispose();
-			receiveMessageSubscription.dispose();
-			changeDocumentSubscription.dispose();
-		});
-
-		void updateWebview(++updateWebviewCounter);
+	public get(key: string): unknown | undefined {
+		return this._storage.get(key);
 	}
 
-	private getHtmlForWebview(webview: vscode.Webview): string {
-		const indexPath = path.join(this.context.extensionPath, 'media', 'graph-editor');
-
-		const baseUri = webview.asWebviewUri(vscode.Uri.file(indexPath));
-
-		let indexHtml = readFileSync(path.join(indexPath, 'index.html'), { encoding: 'utf8' });
-
-		indexHtml = indexHtml.replace('<base href="/">', `  
-		<base href="${String(baseUri)}/">  
-		<meta http-equiv="Content-Security-Policy" content="connect-src https://www.actionforge.dev;">  
-		`);
-
-		return indexHtml;
+	public set(key: string, value: unknown): void {
+		this._storage.set(key, value);
 	}
-}  
+}
+
+/**
+ * Tracks all webviews.
+ */
+class WebviewCollection {
+
+	private readonly _webviews = new Set<{
+		readonly resource: string;
+		readonly webviewPanel: vscode.WebviewPanel;
+	}>();
+
+	/**
+	 * Get all known webviews for a given uri.
+	 */
+	public *get(uri: vscode.Uri): Iterable<vscode.WebviewPanel> {
+		const key = uri.toString();
+		for (const entry of this._webviews) {
+			if (entry.resource === key) {
+				yield entry.webviewPanel;
+			}
+		}
+	}
+
+	/**
+	 * Add a new webview to the collection.
+	 */
+	public add(uri: vscode.Uri, webviewPanel: vscode.WebviewPanel) {
+		const entry = { resource: uri.toString(), webviewPanel };
+		this._webviews.add(entry);
+
+		webviewPanel.onDidDispose(() => {
+			this._webviews.delete(entry);
+		});
+	}
+}
