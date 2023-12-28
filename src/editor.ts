@@ -108,8 +108,8 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 		};
 
 		const debouncedUpdateWebview = debounce(updateWebview, 500, {
-			leading: false, // Ignore first call
-			trailing: true, // Only update view after it stops being called for 500ms
+			leading: false, // Ignore first call(s)
+			trailing: true, // Only update view after events stop being called for 500ms
 		});
 
 		const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
