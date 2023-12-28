@@ -79,7 +79,7 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 			return document.getText().replace(/\r\n/g, '\n');
 		}
 
-		const applyEdit = async (document: vscode.TextDocument, graph: string): Promise<void> => {
+		const applyEdit = (document: vscode.TextDocument, graph: string): void => {
 			const edit = new vscode.WorkspaceEdit();
 
 			// For now replace the entire content of the text object for simplicity.  
@@ -90,7 +90,7 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 				graph,
 			);
 
-			await applyEditLock.acquire("applyEdit", async () => {
+			void applyEditLock.acquire("applyEdit", async () => {
 				await vscode.workspace.applyEdit(edit);
 			});
 		};
@@ -137,7 +137,7 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 				}
 				case 'saveGraph': {
 					internalUpdates.add(document.version + 1 /* plus one as its the future version */);
-					void applyEdit(document, data);
+					applyEdit(document, data);
 					break;
 				}
 			}
