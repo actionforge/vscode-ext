@@ -79,7 +79,7 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 			return document.getText().replace(/\r\n/g, '\n');
 		}
 
-		const applyEdit = async (document: vscode.TextDocument, graph: string): Promise<void> => {
+		const applyEdit = (document: vscode.TextDocument, graph: string): void => {
 			const edit = new vscode.WorkspaceEdit();
 
 			// For now replace the entire content of the text object for simplicity.  
@@ -90,13 +90,10 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 				graph,
 			);
 
-			await applyEditLock.acquire("applyEdit", async () => {
-				// console.log(`[${panel.viewColumn}]Applying edit with version ${document.version} and uri ${document.uri.toString()}`);
+			void applyEditLock.acquire("applyEdit", async () => {
 				await vscode.workspace.applyEdit(edit);
 			});
 		};
-
-		const debounceApplyEdit = debounce(applyEdit.bind(null, document), 0);
 
 		const updateWebview = (oldDocumentVersion: number, graph: string) => {
 			if (document.version > oldDocumentVersion) {
@@ -110,22 +107,24 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 			});
 		};
 
+		const debouncedUpdateWebview = debounce(updateWebview, 500, {
+			leading: false, // Ignore first call(s)
+			trailing: true, // Only update view after events stop being called for 500ms
+		});
+
 		const changeDocumentSubscription = vscode.workspace.onDidChangeTextDocument((e: vscode.TextDocumentChangeEvent) => {
-			// console.log(`[${panel.viewColumn}]Text document change detected with version ${e.document.version} and uri ${e.document.uri.toString()}`);
 			if (e.document.uri.toString() === document.uri.toString() && e.document.isDirty) {
 				if (internalUpdates.has(e.document.version)) {
-					// console.log(`[${panel.viewColumn}]Internal update detected with version ${e.document.version} and uri ${JSON.stringify(e)}`)
 					internalUpdates.delete(e.document.version);
 				} else {
-					console.log(e.document.version, document.version);
-					updateWebview(document.version, getText());
+					debouncedUpdateWebview(document.version, getText());
 				}
 			}
 		});
 
 		const changeViewStatSubScription = panel.onDidChangeViewState((e: vscode.WebviewPanelOnDidChangeViewStateEvent) => {
 			if (e.webviewPanel.visible) {
-				updateWebview(document.version, getText());
+				debouncedUpdateWebview(document.version, getText());
 			}
 		});
 
@@ -137,9 +136,8 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 					break;
 				}
 				case 'saveGraph': {
-					// console.log(`[${panel.viewColumn}]Saving graph with version ${document.version}`);
 					internalUpdates.add(document.version + 1 /* plus one as its the future version */);
-					void debounceApplyEdit(data);
+					applyEdit(document, data);
 					break;
 				}
 			}
