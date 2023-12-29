@@ -13,7 +13,7 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 	private static newActionGraphFileId = 1;
 
 	private static readonly viewType = 'actionforge.graph';
-	private tmpStorage = new TenporaryStorage();
+	private tmpStorage = new TemporaryStorage();
 	private state: vscode.Memento;
 
 	private readonly webviews = new WebviewCollection();
@@ -327,7 +327,7 @@ function closeDocumentsWithUri(targetUri: vscode.Uri): Thenable<void> {
 * Similar to vscode.Memento but sync setter and getter,
 * and only for the lifetime of the extension.
 */
-class TenporaryStorage {
+class TemporaryStorage {
 	private readonly _storage = new Map<string, unknown>();
 
 	public get(key: string): unknown | undefined {
