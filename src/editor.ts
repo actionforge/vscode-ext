@@ -264,7 +264,7 @@ jobs:
 
 		subs.push(sub);
 
-		sub = vscode.commands.registerCommand('actionforge.text-view', async (uri?: vscode.Uri) => {
+		sub = vscode.commands.registerCommand('actionforge.switch-view', async (uri?: vscode.Uri) => {
 			if (!uri) {
 				void vscode.window.showErrorMessage("Command must be executed from the editor toolbar.");
 				return;
