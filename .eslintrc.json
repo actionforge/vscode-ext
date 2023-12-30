@@ -25,7 +25,17 @@
 						"caughtErrorsIgnorePattern": "^_"
 					}
 				],
-				"@typescript-eslint/no-floating-promises": "error"
+				"@typescript-eslint/no-floating-promises": "error",
+				"@typescript-eslint/explicit-function-return-type": [
+					"error",
+					{
+						"allowedNames": [
+							"ignoredFunctionName",
+							"ignoredMethodName"
+						]
+					}
+				],
+				"@typescript-eslint/no-shadow": "error"
 			}
 		},
 		{

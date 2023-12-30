@@ -82,14 +82,14 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 			return document.getText().replace(/\r\n/g, '\n');
 		}
 
-		const applyEdit = (document: vscode.TextDocument, graph: string): void => {
+		const applyEdit = (doc: vscode.TextDocument, graph: string): void => {
 			const edit = new vscode.WorkspaceEdit();
 
 			// For now replace the entire content of the text object for simplicity.  
 			// TODO: (Seb) Check for performance implications.  
 			edit.replace(
-				document.uri,
-				new vscode.Range(0, 0, document.lineCount, 0),
+				doc.uri,
+				new vscode.Range(0, 0, doc.lineCount, 0),
 				graph,
 			);
 
@@ -98,7 +98,7 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 			});
 		};
 
-		const updateWebview = (oldDocumentVersion: number, graph: string) => {
+		const updateWebview = (oldDocumentVersion: number, graph: string): void => {
 			if (document.version > oldDocumentVersion) {
 				return;
 			}
@@ -408,7 +408,7 @@ class WebviewCollection {
 	/**
 	 * Add a new webview to the collection.
 	 */
-	public add(uri: vscode.Uri, webviewPanel: vscode.WebviewPanel) {
+	public add(uri: vscode.Uri, webviewPanel: vscode.WebviewPanel): void {
 		const entry = { resource: uri.toString(), webviewPanel };
 		this._webviews.add(entry);
 
