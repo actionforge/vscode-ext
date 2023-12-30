@@ -10,6 +10,9 @@
 		"name": "Actionforge",
 		"email": "hello@actionforge.dev"
 	},
+	"bugs": {
+		"url": "https://github.com/actionforge/vscode-ext/issues"
+	},
 	"license": "Actionforge Community License",
 	"repository": {
 		"type": "git",
@@ -23,12 +26,11 @@
 		"Other"
 	],
 	"keywords": [
-		"github actions",
+		"actionforge",
+		"graph",
 		"workflows",
 		"actions",
-		"node graph",
-		"action graph",
-		"yaml"
+		"cicd"
 	],
 	"preview": true,
 	"galleryBanner": {
