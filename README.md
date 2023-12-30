@@ -4,7 +4,8 @@
 Welcome to the source code of the Actionforge VS Code Extension
 
 <div align="center" width="100%">
-  <img src="assets/logo.svg" alt="Graph Runner Logo">
+  <!-- No SVG due to VS Code Marketplace restrictions-->
+  <img src="assets/logo.png" alt="Actionforge VS Code Extension logo">
 
 ![ci.yml](https://github.com/actionforge/graph-runner/actions/workflows/ci.yml/badge.svg)
 [![made-with-ts](https://img.shields.io/badge/Made%20with-TS-3178C6.svg)](https://www.typescriptlang.org/)
