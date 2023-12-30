@@ -1,10 +1,8 @@
 {
+	"compileOnSave": false,
 	"compilerOptions": {
-		"module": "commonjs",
-		"target": "es2020",
-		"lib": [
-			"es2020"
-		],
+		"rootDir": "src",
+		"esModuleInterop": true,
 		"forceConsistentCasingInFileNames": true,
 		// strict
 		"alwaysStrict": true,
@@ -24,10 +22,20 @@
 		"useUnknownInCatchVariables": true,
 		// allow
 		"allowSyntheticDefaultImports": true,
-		"outDir": "out",
-		"sourceMap": true,
-		"rootDir": "src",
-		"esModuleInterop": true
+		"inlineSources": true,
+		"inlineSourceMap": true,
+		"resolveJsonModule": true,
+		"declaration": false,
+		"downlevelIteration": true,
+		"experimentalDecorators": true,
+		"moduleResolution": "node",
+		"importHelpers": true,
+		"target": "ES2020",
+		"module": "CommonJS",
+		"useDefineForClassFields": false,
+		"lib": [
+			"ES2020"
+		],
 	},
 	"exclude": [
 		"node_modules",
