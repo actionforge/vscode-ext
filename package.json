@@ -44,8 +44,16 @@
 		],
 		"commands": [
 			{
-				"command": "actionforge.graph",
-				"title": "Action Graph"
+				"icon": "$(screen-full)",
+				"command": "actionforge.fit-to-canvas",
+				"title": "Fit to canvas",
+				"category": "Actionforge"
+			},
+			{
+				"icon": "$(type-hierarchy)",
+				"command": "actionforge.arrange-nodes",
+				"title": "Arrange all nodes",
+				"category": "Actionforge"
 			},
 			{
 				"icon": "$(code)",
@@ -65,6 +73,16 @@
 					"command": "actionforge.switch-view",
 					"group": "navigation",
 					"when": "resourcePath =~ /^.*\\.github[/\\\\]workflows[/\\\\]graphs[/\\\\].*\\.ya?ml/"
+				},
+				{
+					"command": "actionforge.arrange-nodes",
+					"group": "navigation",
+					"when": "resourcePath =~ /^.*\\.github[/\\\\]workflows[/\\\\]graphs[/\\\\].*\\.ya?ml/ && !useTextview"
+				},
+				{
+					"command": "actionforge.fit-to-canvas",
+					"group": "navigation",
+					"when": "resourcePath =~ /^.*\\.github[/\\\\]workflows[/\\\\]graphs[/\\\\].*\\.ya?ml/ && !useTextview"
 				}
 			]
 		}

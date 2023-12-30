@@ -10,13 +10,15 @@ import AsyncLock from 'async-lock';
 
 export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 
-	private static newActionGraphFileId = 1;
-
 	private static readonly viewType = 'actionforge.graph';
-	private tmpStorage = new TenporaryStorage();
-	private state: vscode.Memento;
 
 	private readonly webviews = new WebviewCollection();
+	private readonly tmpStorage = new TemporaryStorage();
+	private readonly state: vscode.Memento;
+
+	private static newActionGraphFileId = 1;
+
+	private panel: vscode.WebviewPanel | undefined;
 
 	constructor(
 		private readonly context: vscode.ExtensionContext
@@ -30,6 +32,7 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 		_token: vscode.CancellationToken
 	): Promise<void> {
 
+		this.panel = panel;
 		const useTextview = this.state.get('useTextview') ?? false;
 
 		if (useTextview) {
@@ -152,6 +155,14 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 		updateWebview(document.version, getText());
 	}
 
+	public async sendMessage(type: string, data: unknown): Promise<void> {
+		if (!this.panel) {
+			throw new Error('no panel');
+		}
+
+		await this.postMessage(this.panel, type, data);
+	}
+
 	private postMessage(panel: vscode.WebviewPanel, type: string, data: unknown, requestId?: number): Thenable<boolean> {
 		return panel.webview.postMessage({ type, data, requestId });
 	}
@@ -264,23 +275,56 @@ jobs:
 
 		subs.push(sub);
 
-		sub = vscode.commands.registerCommand('actionforge.switch-view', async (uri?: vscode.Uri) => {
+		const provider = new AgEditorProvider(context);
+
+		const uriCheck = (uri?: vscode.Uri): uri is vscode.Uri => {
 			if (!uri) {
 				void vscode.window.showErrorMessage("Command must be executed from the editor toolbar.");
-				return;
+				return false;
 			} else if (uri.scheme !== 'file') {
 				void vscode.window.showErrorMessage("Only local files are supported.");
-				return;
+				return false;
 			} else if (uri.path.indexOf('.github/workflows/graphs') === -1 || !/\.ya?ml$/.test(uri.path)) {
 				void vscode.window.showErrorMessage("File not in .github/workflows/graphs directory.");
+				return false;
+			}
+			return true;
+		}
+
+		sub = vscode.commands.registerCommand('actionforge.fit-to-canvas', async (uri?: vscode.Uri) => {
+			if (!uriCheck(uri)) {
 				return;
 			}
 
-			// If hte command was executed from the text editor, open the file in the graph editor.
+			void provider.sendMessage('fitToCanvas', null);
+		});
+		subs.push(sub);
+
+		sub = vscode.commands.registerCommand('actionforge.arrange-nodes', async (uri?: vscode.Uri) => {
+			if (!uriCheck(uri)) {
+				return;
+			}
+
+			void provider.sendMessage('arrangeNodes', null);
+			void provider.sendMessage('fitToCanvas', null);
+		});
+		subs.push(sub);
+
+		sub = vscode.commands.registerCommand('actionforge.switch-view', async (uri?: vscode.Uri) => {
+			if (!uriCheck(uri)) {
+				return;
+			}
+
+			// If the command was executed from the text editor, open the file in the graph editor.
 			// Otherwise open the file in a new text editor.
 			const activeEditor = vscode.window.activeTextEditor;
 
-			void context.workspaceState.update('useTextview', !(await context.workspaceState.get('useTextview') ?? false))
+			const newValue = !(await context.workspaceState.get('useTextview') ?? false);
+
+			void vscode.commands.executeCommand('setContext', 'useTextview', newValue)
+				.then(() => {
+					return context.workspaceState.update('useTextview', newValue);
+				})
 				.then(() => {
 					return vscode.commands.executeCommand('workbench.action.closeActiveEditor');
 				})
@@ -294,7 +338,7 @@ jobs:
 		});
 		subs.push(sub);
 
-		sub = vscode.window.registerCustomEditorProvider(AgEditorProvider.viewType, new AgEditorProvider(context), {
+		sub = vscode.window.registerCustomEditorProvider(AgEditorProvider.viewType, provider, {
 			webviewOptions: {
 				retainContextWhenHidden: true,
 			},
@@ -327,7 +371,7 @@ function closeDocumentsWithUri(targetUri: vscode.Uri): Thenable<void> {
 * Similar to vscode.Memento but sync setter and getter,
 * and only for the lifetime of the extension.
 */
-class TenporaryStorage {
+class TemporaryStorage {
 	private readonly _storage = new Map<string, unknown>();
 
 	public get(key: string): unknown | undefined {

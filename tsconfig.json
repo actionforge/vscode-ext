@@ -5,9 +5,27 @@
 		"lib": [
 			"es2020"
 		],
+		"forceConsistentCasingInFileNames": true,
+		// strict
+		"alwaysStrict": true,
+		"strict": true,
+		"strictNullChecks": true,
+		"strictPropertyInitialization": true,
+		"strictBindCallApply": true,
+		"strictFunctionTypes": true,
+		// no
+		"noImplicitOverride": true,
+		"noImplicitThis": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noPropertyAccessFromIndexSignature": true,
+		"noFallthroughCasesInSwitch": true,
+		// use
+		"useUnknownInCatchVariables": true,
+		// allow
+		"allowSyntheticDefaultImports": true,
 		"outDir": "out",
 		"sourceMap": true,
-		"strict": true,
 		"rootDir": "src",
 		"esModuleInterop": true
 	},
