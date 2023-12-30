@@ -121,12 +121,12 @@
 		"@types/js-yaml": "^4.0.9",
 		"@types/lodash.debounce": "^4.0.9",
 		"@types/node": "^16.18.34",
-		"@types/vscode": "^1.73.0",
-		"@typescript-eslint/eslint-plugin": "^6.7.0",
-		"@typescript-eslint/parser": "^6.15.0",
+		"@types/vscode": "^1.85.0",
+		"@typescript-eslint/eslint-plugin": "^6.16.0",
+		"@typescript-eslint/parser": "^6.16.0",
 		"esbuild": "^0.19.11",
-		"eslint": "^8.26.0",
-		"typescript": "^5.2.2"
+		"eslint": "^8.56.0",
+		"typescript": "^5.3.3"
 	},
 	"dependencies": {
 		"@octokit/rest": "^20.0.2",
