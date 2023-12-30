@@ -1,0 +1,32 @@
+# Exclude source files
+src/**
+
+# Exclude test files and folders
+test/**
+**/*.test.ts
+**/*.spec.ts
+
+# Exclude development configuration
+.eslintrc
+tsconfig.json
+.vscode/**
+
+# Exclude git and GitHub related files
+.git/**
+.github/**
+.gitignore
+
+# Exclude Node.js development dependencies
+node_modules/**
+
+# Exclude the build script
+esbuild-watch
+
+# Exclude package manager files
+package-lock.json
+yarn.lock
+
+# Exclude other unnecessary files
+*.map
+*.ts
+*.tsx
