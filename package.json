@@ -3,7 +3,7 @@
 	"displayName": "Actionforge Graph Editor",
 	"description": "A visual editor for GitHub Actions workflows",
 	"version": "0.4.42",
-	"publisher": "actionforge",
+	"publisher": "Actionforge",
 	"icon": "assets/icon.png",
 	"homepage": "https://www.actionforge.dev",
 	"author": {
