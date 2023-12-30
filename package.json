@@ -121,7 +121,7 @@
 		"@types/js-yaml": "^4.0.9",
 		"@types/lodash.debounce": "^4.0.9",
 		"@types/node": "^16.18.34",
-		"@types/vscode": "^1.85.0",
+		"@types/vscode": "^1.74.0",
 		"@typescript-eslint/eslint-plugin": "^6.16.0",
 		"@typescript-eslint/parser": "^6.16.0",
 		"esbuild": "^0.19.11",
