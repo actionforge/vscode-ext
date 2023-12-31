@@ -49,6 +49,18 @@ connections:
     dst:
       node: branch-v1-yellow-pink-monkey
       port: condition
+  - src:
+      node: string-fmt-v1-orange-blue-silver
+      port: result
+    dst:
+      node: github-com-actions-upload-artifact-blackberry-green-purple
+      port: name
+  - src:
+      node: env-get-v1-grape-cranberry-silver
+      port: env
+    dst:
+      node: string-fmt-v1-orange-blue-silver
+      port: input[0]
 nodes:
   - id: gh-start
     type: gh-start@v1
@@ -87,8 +99,8 @@ nodes:
   - id: run-v1-tiger-squirrel-silver
     type: run@v1
     position:
-      x: 2190
-      y: 1220
+      x: 1740
+      y: 1150
     inputs:
       script: |-
         npm run vscode:prepublish
@@ -100,15 +112,15 @@ nodes:
   - id: branch-v1-yellow-pink-monkey
     type: branch@v1
     position:
-      x: 1970
-      y: 1310
+      x: 1520
+      y: 1240
     settings:
       folded: false
   - id: string-match-v1-kiwi-panda-cat
     type: string-match@v1
     position:
-      x: 360
-      y: 1730
+      x: 1140
+      y: 1500
     inputs:
       op: startswith
       str2: refs/tags/
@@ -118,8 +130,8 @@ nodes:
   - id: env-get-v1-cat-pomegranate-blueberry
     type: env-get@v1
     position:
-      x: 40
-      y: 1720
+      x: 880
+      y: 1490
     inputs:
       env: GITHUB_REF
     settings:
@@ -127,11 +139,30 @@ nodes:
   - id: github-com-actions-upload-artifact-blackberry-green-purple
     type: github.com/actions/upload-artifact
     position:
-      x: 2590
-      y: 1270
+      x: 2050
+      y: 1140
     inputs:
-      name: vscode-ext
+      name: ''
       path: '*.vsix'
+    settings:
+      folded: false
+  - id: string-fmt-v1-orange-blue-silver
+    type: string-fmt@v1
+    position:
+      x: 1470
+      y: 1600
+    inputs:
+      input[0]: null
+      fmt: vscode-ext-%v
+    settings:
+      folded: false
+  - id: env-get-v1-grape-cranberry-silver
+    type: env-get@v1
+    position:
+      x: 1110
+      y: 1700
+    inputs:
+      env: GITHUB_REF_NAME
     settings:
       folded: false
 registries: []
