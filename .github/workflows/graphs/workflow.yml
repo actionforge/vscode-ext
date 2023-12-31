@@ -87,7 +87,7 @@ nodes:
       script: |-
         npm run vscode:prepublish
         rm *.vsix
-        npx vsce package --out release
+        npx vsce package
     settings:
       folded: false
   - id: branch-v1-yellow-pink-monkey
