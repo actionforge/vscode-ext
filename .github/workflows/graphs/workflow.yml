@@ -1,0 +1,138 @@
+entry: gh-start
+executions:
+  - src:
+      node: gh-start
+      port: exec-on-push
+    dst:
+      node: github-com-actions-checkout-lemon-parrot-penguin
+      port: exec
+  - src:
+      node: github-com-actions-checkout-lemon-parrot-penguin
+      port: exec
+    dst:
+      node: github-com-actions-setup-node-blackberry-octopus-pink
+      port: exec
+  - src:
+      node: github-com-actions-setup-node-blackberry-octopus-pink
+      port: exec
+    dst:
+      node: run-v1-penguin-cherry-pineapple
+      port: exec
+  - src:
+      node: branch-v1-yellow-pink-monkey
+      port: exec-then
+    dst:
+      node: run-v1-tiger-squirrel-silver
+      port: exec
+  - src:
+      node: run-v1-penguin-cherry-pineapple
+      port: exec-success
+    dst:
+      node: branch-v1-yellow-pink-monkey
+      port: exec
+  - src:
+      node: run-v1-tiger-squirrel-silver
+      port: exec-success
+    dst:
+      node: github-com-actions-upload-artifact-blackberry-green-purple
+      port: exec
+connections:
+  - src:
+      node: env-get-v1-cat-pomegranate-blueberry
+      port: env
+    dst:
+      node: string-match-v1-kiwi-panda-cat
+      port: str1
+  - src:
+      node: string-match-v1-kiwi-panda-cat
+      port: result
+    dst:
+      node: branch-v1-yellow-pink-monkey
+      port: condition
+nodes:
+  - id: gh-start
+    type: gh-start@v1
+    position:
+      x: 10
+      y: 10
+    settings:
+      folded: false
+  - id: github-com-actions-checkout-lemon-parrot-penguin
+    type: github.com/actions/checkout
+    position:
+      x: 310
+      y: 1000
+    settings:
+      folded: false
+  - id: github-com-actions-setup-node-blackberry-octopus-pink
+    type: github.com/actions/setup-node
+    position:
+      x: 740
+      y: 990
+    inputs:
+      node-version: 20.10.0
+    settings:
+      folded: false
+  - id: run-v1-penguin-cherry-pineapple
+    type: run@v1
+    position:
+      x: 1150
+      y: 900
+    inputs:
+      script: |-
+        npm install
+        npm run lint
+    settings:
+      folded: false
+  - id: run-v1-tiger-squirrel-silver
+    type: run@v1
+    position:
+      x: 2190
+      y: 1220
+    inputs:
+      script: |-
+        npm run vscode:prepublish
+        setopt no_nomatch
+        rm *.vsix
+        npx vsce package
+    settings:
+      folded: false
+  - id: branch-v1-yellow-pink-monkey
+    type: branch@v1
+    position:
+      x: 1970
+      y: 1310
+    settings:
+      folded: false
+  - id: string-match-v1-kiwi-panda-cat
+    type: string-match@v1
+    position:
+      x: 360
+      y: 1730
+    inputs:
+      op: startswith
+      str2: refs/tags/
+      str1: ''
+    settings:
+      folded: false
+  - id: env-get-v1-cat-pomegranate-blueberry
+    type: env-get@v1
+    position:
+      x: 40
+      y: 1720
+    inputs:
+      env: GITHUB_REF
+    settings:
+      folded: false
+  - id: github-com-actions-upload-artifact-blackberry-green-purple
+    type: github.com/actions/upload-artifact
+    position:
+      x: 2590
+      y: 1270
+    inputs:
+      name: vscode-ext
+      path: '*.vsix'
+    settings:
+      folded: false
+registries: []
+description: ''
