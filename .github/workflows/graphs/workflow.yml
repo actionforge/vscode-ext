@@ -30,6 +30,12 @@ executions:
     dst:
       node: branch-v1-yellow-pink-monkey
       port: exec
+  - src:
+      node: run-v1-tiger-squirrel-silver
+      port: exec-success
+    dst:
+      node: github-com-actions-upload-artifact-blackberry-green-purple
+      port: exec
 connections:
   - src:
       node: env-get-v1-cat-pomegranate-blueberry
@@ -86,6 +92,7 @@ nodes:
     inputs:
       script: |-
         npm run vscode:prepublish
+        setopt no_nomatch
         rm *.vsix
         npx vsce package
     settings:
