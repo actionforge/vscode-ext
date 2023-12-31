@@ -70,7 +70,7 @@ nodes:
   - id: run-v1-penguin-cherry-pineapple
     type: run@v1
     position:
-      x: 1140
+      x: 1150
       y: 900
     inputs:
       script: |-
@@ -81,22 +81,26 @@ nodes:
   - id: run-v1-tiger-squirrel-silver
     type: run@v1
     position:
-      x: 1860
-      y: 740
+      x: 1740
+      y: 1150
+    inputs:
+      script: |-
+        npm run vscode:prepublish
+        npx vsce package
     settings:
       folded: false
   - id: branch-v1-yellow-pink-monkey
     type: branch@v1
     position:
-      x: 1500
-      y: 870
+      x: 1520
+      y: 1240
     settings:
       folded: false
   - id: string-match-v1-kiwi-panda-cat
     type: string-match@v1
     position:
-      x: 1070
-      y: 710
+      x: 1140
+      y: 1500
     inputs:
       op: startswith
       str2: refs/tags/
@@ -106,8 +110,8 @@ nodes:
   - id: env-get-v1-cat-pomegranate-blueberry
     type: env-get@v1
     position:
-      x: 660
-      y: 800
+      x: 880
+      y: 1490
     inputs:
       env: GITHUB_REF_NAME
     settings:
