@@ -1,0 +1,11 @@
+on: [push]
+
+jobs:
+    build-and-publish:
+      runs-on: ubuntu-latest
+      name: My workflow
+      steps:
+        - name: Execute Action Graph
+          uses: actionforge/action@v0.4.35
+          with:
+            graph_file: workflow.yml
