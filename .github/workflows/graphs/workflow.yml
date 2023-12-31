@@ -28,25 +28,7 @@ executions:
       node: run-v1-penguin-cherry-pineapple
       port: exec-success
     dst:
-      node: run-v1-gray-cat-monkey
-      port: exec
-  - src:
-      node: run-v1-gray-cat-monkey
-      port: exec-success
-    dst:
       node: branch-v1-yellow-pink-monkey
-      port: exec
-  - src:
-      node: run-v1-penguin-cherry-pineapple
-      port: exec-err
-    dst:
-      node: run-v1-gray-cat-monkey
-      port: exec
-  - src:
-      node: run-v1-tiger-squirrel-silver
-      port: exec-success
-    dst:
-      node: github-com-actions-upload-artifact-blackberry-green-purple
       port: exec
 connections:
   - src:
@@ -61,24 +43,6 @@ connections:
     dst:
       node: branch-v1-yellow-pink-monkey
       port: condition
-  - src:
-      node: string-match-v1-kiwi-panda-cat
-      port: result
-    dst:
-      node: string-fmt-v1-lion-elephant-elephant
-      port: input[0]
-  - src:
-      node: string-fmt-v1-lion-elephant-elephant
-      port: result
-    dst:
-      node: env-array-v1-raspberry-purple-gold
-      port: env[0]
-  - src:
-      node: env-array-v1-raspberry-purple-gold
-      port: env
-    dst:
-      node: run-v1-gray-cat-monkey
-      port: env
 nodes:
   - id: gh-start
     type: gh-start@v1
@@ -151,37 +115,6 @@ nodes:
       y: 1720
     inputs:
       env: GITHUB_REF
-    settings:
-      folded: false
-  - id: run-v1-gray-cat-monkey
-    type: run@v1
-    position:
-      x: 1560
-      y: 860
-    inputs:
-      shell: python
-      script: |-
-        import os
-        print("FOO", os.environ['FOO'])
-    settings:
-      folded: false
-  - id: env-array-v1-raspberry-purple-gold
-    type: env-array@v1
-    position:
-      x: 1170
-      y: 1620
-    inputs:
-      env[0]: ''
-    settings:
-      folded: false
-  - id: string-fmt-v1-lion-elephant-elephant
-    type: string-fmt@v1
-    position:
-      x: 770
-      y: 1650
-    inputs:
-      input[0]: null
-      fmt: FOO=%v
     settings:
       folded: false
   - id: github-com-actions-upload-artifact-blackberry-green-purple
