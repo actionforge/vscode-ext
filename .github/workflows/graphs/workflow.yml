@@ -19,16 +19,22 @@ executions:
       node: run-v1-penguin-cherry-pineapple
       port: exec
   - src:
-      node: run-v1-penguin-cherry-pineapple
-      port: exec-success
-    dst:
-      node: branch-v1-yellow-pink-monkey
-      port: exec
-  - src:
       node: branch-v1-yellow-pink-monkey
       port: exec-then
     dst:
       node: run-v1-tiger-squirrel-silver
+      port: exec
+  - src:
+      node: run-v1-penguin-cherry-pineapple
+      port: exec-success
+    dst:
+      node: run-v1-gray-cat-monkey
+      port: exec
+  - src:
+      node: run-v1-gray-cat-monkey
+      port: exec-success
+    dst:
+      node: branch-v1-yellow-pink-monkey
       port: exec
 connections:
   - src:
@@ -43,6 +49,24 @@ connections:
     dst:
       node: branch-v1-yellow-pink-monkey
       port: condition
+  - src:
+      node: string-match-v1-kiwi-panda-cat
+      port: result
+    dst:
+      node: string-fmt-v1-lion-elephant-elephant
+      port: input[0]
+  - src:
+      node: string-fmt-v1-lion-elephant-elephant
+      port: result
+    dst:
+      node: env-array-v1-raspberry-purple-gold
+      port: env[0]
+  - src:
+      node: env-array-v1-raspberry-purple-gold
+      port: env
+    dst:
+      node: run-v1-gray-cat-monkey
+      port: env
 nodes:
   - id: gh-start
     type: gh-start@v1
@@ -81,8 +105,8 @@ nodes:
   - id: run-v1-tiger-squirrel-silver
     type: run@v1
     position:
-      x: 1740
-      y: 1150
+      x: 2150
+      y: 1220
     inputs:
       script: |-
         npm run vscode:prepublish
@@ -92,15 +116,15 @@ nodes:
   - id: branch-v1-yellow-pink-monkey
     type: branch@v1
     position:
-      x: 1520
-      y: 1240
+      x: 1920
+      y: 1310
     settings:
       folded: false
   - id: string-match-v1-kiwi-panda-cat
     type: string-match@v1
     position:
-      x: 1140
-      y: 1500
+      x: 360
+      y: 1730
     inputs:
       op: startswith
       str2: refs/tags/
@@ -110,10 +134,41 @@ nodes:
   - id: env-get-v1-cat-pomegranate-blueberry
     type: env-get@v1
     position:
-      x: 880
-      y: 1490
+      x: 40
+      y: 1720
     inputs:
       env: GITHUB_REF_NAME
+    settings:
+      folded: false
+  - id: run-v1-gray-cat-monkey
+    type: run@v1
+    position:
+      x: 1520
+      y: 1090
+    inputs:
+      shell: python
+      script: |-
+        import os
+        print("FOO", os.environ['FOO'])
+    settings:
+      folded: false
+  - id: env-array-v1-raspberry-purple-gold
+    type: env-array@v1
+    position:
+      x: 1170
+      y: 1620
+    inputs:
+      env[0]: ''
+    settings:
+      folded: false
+  - id: string-fmt-v1-lion-elephant-elephant
+    type: string-fmt@v1
+    position:
+      x: 800
+      y: 1700
+    inputs:
+      input[0]: null
+      fmt: FOO=%v
     settings:
       folded: false
 registries: []
