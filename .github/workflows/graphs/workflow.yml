@@ -42,6 +42,12 @@ executions:
     dst:
       node: run-v1-gray-cat-monkey
       port: exec
+  - src:
+      node: run-v1-tiger-squirrel-silver
+      port: exec-success
+    dst:
+      node: github-com-actions-upload-artifact-blackberry-green-purple
+      port: exec
 connections:
   - src:
       node: env-get-v1-cat-pomegranate-blueberry
@@ -111,18 +117,19 @@ nodes:
   - id: run-v1-tiger-squirrel-silver
     type: run@v1
     position:
-      x: 2150
+      x: 2190
       y: 1220
     inputs:
       script: |-
         npm run vscode:prepublish
-        npx vsce package
+        rm *.vsix
+        npx vsce package --out release
     settings:
       folded: false
   - id: branch-v1-yellow-pink-monkey
     type: branch@v1
     position:
-      x: 1920
+      x: 1970
       y: 1310
     settings:
       folded: false
@@ -143,14 +150,14 @@ nodes:
       x: 40
       y: 1720
     inputs:
-      env: GITHUB_REF_NAME
+      env: GITHUB_REF
     settings:
       folded: false
   - id: run-v1-gray-cat-monkey
     type: run@v1
     position:
-      x: 1520
-      y: 1090
+      x: 1560
+      y: 860
     inputs:
       shell: python
       script: |-
@@ -170,11 +177,21 @@ nodes:
   - id: string-fmt-v1-lion-elephant-elephant
     type: string-fmt@v1
     position:
-      x: 800
-      y: 1700
+      x: 770
+      y: 1650
     inputs:
       input[0]: null
       fmt: FOO=%v
+    settings:
+      folded: false
+  - id: github-com-actions-upload-artifact-blackberry-green-purple
+    type: github.com/actions/upload-artifact
+    position:
+      x: 2590
+      y: 1270
+    inputs:
+      name: vscode-ext
+      path: '*.vsix'
     settings:
       folded: false
 registries: []
