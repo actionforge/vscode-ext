@@ -36,6 +36,12 @@ executions:
     dst:
       node: branch-v1-yellow-pink-monkey
       port: exec
+  - src:
+      node: run-v1-penguin-cherry-pineapple
+      port: exec-err
+    dst:
+      node: run-v1-gray-cat-monkey
+      port: exec
 connections:
   - src:
       node: env-get-v1-cat-pomegranate-blueberry
