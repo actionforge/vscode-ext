@@ -19,7 +19,7 @@
 		"url": "https://github.com/actionforge/vscode-ext"
 	},
 	"engines": {
-		"vscode": "^1.85.0"
+		"vscode": "1.85.0"
 	},
 	"categories": [
 		"Visualization",
@@ -119,22 +119,22 @@
 		"test-compile": "tsc -p ./"
 	},
 	"devDependencies": {
-		"@types/async-lock": "^1.4.2",
-		"@types/js-yaml": "^4.0.9",
-		"@types/lodash.debounce": "^4.0.9",
-		"@types/node": "^16.18.34",
-		"@types/vscode": "^1.85.0",
-		"@typescript-eslint/eslint-plugin": "^6.16.0",
-		"@typescript-eslint/parser": "^6.16.0",
-		"esbuild": "^0.19.11",
-		"eslint": "^8.56.0",
-		"tslib": "^2.6.2",
-		"typescript": "^5.3.3"
+		"@types/async-lock": "1.4.2",
+		"@types/js-yaml": "4.0.9",
+		"@types/lodash.debounce": "4.0.9",
+		"@types/node": "20.10.6",
+		"@types/vscode": "1.85.0",
+		"@typescript-eslint/eslint-plugin": "6.16.0",
+		"@typescript-eslint/parser": "6.16.0",
+		"esbuild": "0.19.11",
+		"eslint": "8.56.0",
+		"tslib": "2.6.2",
+		"typescript": "5.3.3"
 	},
 	"dependencies": {
-		"@octokit/rest": "^20.0.2",
-		"async-lock": "^1.4.1",
-		"js-yaml": "^4.1.0",
-		"lodash.debounce": "^4.0.8"
+		"@octokit/rest": "20.0.2",
+		"async-lock": "1.4.1",
+		"js-yaml": "4.1.0",
+		"lodash.debounce": "4.0.8"
 	}
 }
