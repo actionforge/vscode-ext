@@ -104,8 +104,7 @@ nodes:
     inputs:
       script: |-
         npm run vscode:prepublish
-        setopt no_nomatch
-        rm *.vsix
+        rm *.vsix 2>/dev/null || true
         npx vsce package
     settings:
       folded: false
