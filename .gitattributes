@@ -1,1 +1,2 @@
 *.png filter=lfs diff=lfs merge=lfs -text
+assets/icon.png !filter !diff !merge -text
