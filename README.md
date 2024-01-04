@@ -7,7 +7,7 @@ Welcome to the source code of the Actionforge VS Code Extension
   <!-- No SVG due to VS Code Marketplace restrictions-->
   <img src="assets/logo.png" alt="Actionforge VS Code Extension logo">
 
-![ci.yml](https://github.com/actionforge/graph-runner/actions/workflows/ci.yml/badge.svg)
+[![view-action-graph](https://img.shields.io/github/actions/workflow/status/actionforge/vscode-ext/build-and-publish.yml?label=View%20Action%20Graph)](https://www.actionforge.dev/github/actionforge/vscode-ext/main/.github/workflows/graphs/build-and-publish.yml)
 [![made-with-ts](https://img.shields.io/badge/Made%20with-TS-3178C6.svg)](https://www.typescriptlang.org/)
 [![License](https://img.shields.io/badge/License-ACL-blue?color=orange)](https://www.github.com/actionforge/legal/blob/main/LICENSE.md)
 

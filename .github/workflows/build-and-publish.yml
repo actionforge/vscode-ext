@@ -6,6 +6,6 @@ jobs:
       name: My workflow
       steps:
         - name: Execute Action Graph
-          uses: actionforge/action@v0.4.35
+          uses: actionforge/action@v0.8.30
           with:
-            graph_file: workflow.yml
+            graph_file: build-and-publish.yml
