@@ -246,7 +246,7 @@ jobs:
       name: My workflow
       steps:
         - name: Execute Action Graph
-          uses: actionforge/action@v0.4.35
+          uses: actionforge/action@v0.8.31
           with:
             graph_file: ${newName}`;
 
