@@ -139,8 +139,11 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 					break;
 				}
 				case 'saveGraph': {
-					internalUpdates.add(document.version + 1 /* plus one as its the future version */);
-					applyEdit(document, data);
+
+					if (data !== getText()) {
+						internalUpdates.add(document.version + 1 /* plus one as its the future version */);
+						applyEdit(document, data);
+					}
 					break;
 				}
 			}
