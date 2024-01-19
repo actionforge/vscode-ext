@@ -89,6 +89,20 @@
 			}
 		],
 		"menus": {
+			"commandPalette": [
+				{
+					"command": "actionforge.fit-to-canvas",
+					"when": "false"
+				},
+				{
+					"command": "actionforge.arrange-nodes",
+					"when": "false"
+				},
+				{
+					"command": "actionforge.switch-view",
+					"when": "false"
+				}
+			],
 			"editor/title": [
 				{
 					"command": "actionforge.switch-view",
