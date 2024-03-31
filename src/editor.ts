@@ -249,7 +249,7 @@ jobs:
       name: My workflow
       steps:
         - name: Execute Action Graph
-          uses: actionforge/action@919d415a6b6e22919f7e115cf594ae52ded95041  # v0.8.31
+          uses: actionforge/action@b350d491aef4ae17ac4f5270a2fc5186be0f39db  # v0.9.42
           with:
             graph_file: ${newName}`;
 
