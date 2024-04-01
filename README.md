@@ -16,7 +16,15 @@ Welcome to the source code of the Actionforge VS Code Extension
 Actionforge supercharges your GitHub Actions workflow experience in VS Code. Designed for time saving, this extension integrates seamlessly into your coding environment, offering a suite of tools to help you manage your GitHub Actions workflows. Whether you're a beginner or a seasoned developer, Actionforge helps set up your workflows within minutes, not hours. You can finally say good bye to tedious editing of YAML files.
 
 <div align="center" width="100%">
-  <img src="assets/graph-editor.png" alt="Graph Editor Screenshot">
+  <img src="assets/graph-editor.jpg" alt="Graph Editor Screenshot">
+</div>
+
+## Video Tutorial
+
+<div align="center" width="100%">
+  <a href="https://www.actionforge.dev/tour/vscode">
+    <img src="media/graph-editor/assets/tour01.jpg" alt="Actionforge Tour">
+  </a>
 </div>
 
 ## Create your first workflow
