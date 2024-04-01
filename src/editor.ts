@@ -134,6 +134,16 @@ export class AgEditorProvider implements vscode.CustomTextEditorProvider {
 		const receiveMessageSubscription = panel.webview.onDidReceiveMessage(e => {
 			const { type, data } = e;
 			switch (type) {
+				case 'openExternalLink': {
+					const url = vscode.Uri.parse(data);
+					const allowedAuthorities = ['www.actionforge.dev', 'github.com', 'www.github.com', 'actionforge.dev'];
+					if (url.scheme === 'https' && allowedAuthorities.includes(url.authority)) {
+						void vscode.env.openExternal(url);
+					} else {
+						void vscode.window.showInformationMessage(`Unable to open link: ${data}`);
+					}
+					break;
+				}
 				case 'saveTransform': {
 					this.tmpStorage.set(`transform_${document.uri.fsPath}`, data);
 					break;
