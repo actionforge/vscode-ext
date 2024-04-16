@@ -2,7 +2,7 @@
 	"name": "actionforge",
 	"displayName": "Actionforge Graph Editor",
 	"description": "A visual editor for GitHub Actions workflows",
-	"version": "0.9.82",
+	"version": "0.9.84",
 	"publisher": "Actionforge",
 	"icon": "assets/icon.png",
 	"homepage": "https://www.actionforge.dev",
