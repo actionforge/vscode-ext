@@ -64,9 +64,18 @@ jobs:
       name: My workflow
       steps:
         - name: Execute Action Graph
-          uses: actionforge/action@5636645834e4a75cbc8c6c204e872ddc27632738  # v0.9.52
+          uses: actionforge/action@1cb7c397d2c7caa8d8071041976b6f2e4e2ead20  # v0.9.58
           with:
             graph_file: my-workflow.yml
+
+            # Uncomment to use secrets within the action graph.
+            # secrets: ${{ toJson(secrets) }}
+
+            # Uncomment to pass inputs from a 'workflow_dispatch' event.
+            # inputs: ${{ toJson(inputs) }}
+
+            # Uncomment to access values set by the matrix strategy.
+            # matrix: ${{ toJson(matrix) }}
 ```
 
 The second one is the action graph itself. This is a YAML file that you can edit via the graph editor that is part of this extension.
